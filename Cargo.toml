@@ -1,0 +1,24 @@
+[package]
+name = "gwy15-common"
+version = "0.1.0"
+edition = "2018"
+
+[features]
+default = [ "rustls" ]
+native-tls = [
+    "reqwest/native-tls",
+]
+rustls = [
+    "reqwest/rustls-tls",
+]
+
+[dependencies]
+reqwest = { version = "0.11.3", default-features = false, features = [] }
+toml = "0.5.8"
+semver = { version = "1.0.4", features = ["serde"] }
+log = "0.4.14"
+thiserror = "1.0.28"
+
+[dev-dependencies]
+tokio = { version = "*", features = ["full"] }
+pretty_env_logger = "*"
