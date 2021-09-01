@@ -27,5 +27,5 @@ log = "0.4.14"
 thiserror = "1.0.28"
 
 [dev-dependencies]
-tokio = { version = "*", features = ["full"] }
-pretty_env_logger = "*"
+tokio = { version = "1", features = ["full"] }
+pretty_env_logger = "1"
