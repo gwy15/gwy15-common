@@ -12,7 +12,7 @@ const URLS: &[&str] = &[
     "https://raw.fastgit.org/gwy15/versions/main/versions.toml",
 ];
 
-pub async fn get_versions(client: &Client, url: &str) -> Result<HashMap<String, Version>> {
+pub async fn get_all_versions(client: Client, url: &str) -> Result<HashMap<String, Version>> {
     let rsp = client.get(url).send().await?;
     let text = rsp.text().await?;
     let versions = toml::from_str(&text)?;
@@ -23,26 +23,21 @@ pub async fn get_version(identifier: impl AsRef<str>) -> Result<Option<Version>>
     let client = reqwest::ClientBuilder::new()
         .timeout(Duration::from_secs(3))
         .build()?;
-    for (idx, url) in URLS.iter().enumerate() {
-        debug!("using url {} to retrieve version info...", url);
-        match get_versions(&client, url).await {
-            Ok(versions) => return Ok(versions.get(identifier.as_ref()).cloned()),
-            Err(e) => {
-                debug!("get version failed: {:?}", e);
-                if idx == URLS.len() - 1 {
-                    error!("get version ran out all urls.");
-                    return Err(e);
-                } else {
-                    warn!(
-                        "failed to get versions from url {}, will try fallbacks.",
-                        url
-                    );
-                    continue;
-                }
-            }
+    // simultaneous emit
+    let futures = URLS
+        .iter()
+        .map(|url| Box::pin(get_all_versions(client.clone(), url)));
+    match futures::future::select_ok(futures).await {
+        Ok((versions, _)) => Ok(versions.get(identifier.as_ref()).cloned()),
+        Err(last_error) => {
+            warn!(
+                "failed to get version for {}: {:?}",
+                identifier.as_ref(),
+                last_error
+            );
+            Err(last_error)
         }
     }
-    unreachable!()
 }
 
 #[cfg(test)]
