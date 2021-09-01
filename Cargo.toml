@@ -2,6 +2,11 @@
 name = "gwy15-common"
 version = "0.1.0"
 edition = "2018"
+authors = ["gwy15 <gwy15thu@gmail.com>"]
+license = "WTFPL"
+homepage = "https://github.com/gwy15/gwy15-common"
+repository = "https://github.com/gwy15/gwy15-common"
+documentation = "https://docs.rs/gwy15-common/"
 
 [features]
 default = [ "rustls" ]
